@@ -1,0 +1,107 @@
+https://aniworld.to/_ray/pow
+
+
+<html lang="de"><head><meta charset="utf-8"><title>Just a moment...</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link href="/public/css/main.min.css?version=1" rel="stylesheet" /><link href="/public/css/main.dark.min.css?version=1" rel="stylesheet" /><script type="text/javascript" src="/public/js/jquery.min.js?version=15"></script><script type="text/javascript" src="/public/js/jquery-ui.min.js?version=15"></script><script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback" async="async" defer="defer"></script></meta></meta></head><body><style>
+        .logo-wrapper-check {
+            width: 100%;
+            text-align: center;
+            float: none;
+
+            height: 85px;
+            background: #637cf9 none repeat scroll 0 0;
+            padding: 16px 19px 0;
+
+        }
+        .header-logo-check {
+            float: none !important;
+            display: inline-block !important;
+        }
+        .header-logo-check {
+            background: url("/public/svg/aniworld-to-logo.svg") no-repeat center center;
+            float: right;
+            background-size: 151px 55px;
+            transition: transform .3s
+        }
+
+        .svg .header-logo-check {
+            background: url("/public/svg/aniworld-to-logo.svg") no-repeat center center;
+            width: 158px;
+            height: 55px;
+            float: right;
+            background-size: 151px 55px
+        }
+        .lds-ellipsis {
+            display: inline-block;
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 10px auto;
+            display: block;
+        }
+        .lds-ellipsis div {
+            position: absolute;
+            top: 33px;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #fff;
+            animation-timing-function: cubic-bezier(0, 1, 1, 0);
+        }
+        .lds-ellipsis div:nth-child(1) {
+            left: 8px;
+            animation: lds-ellipsis1 0.6s infinite;
+        }
+        .lds-ellipsis div:nth-child(2) {
+            left: 8px;
+            animation: lds-ellipsis2 0.6s infinite;
+        }
+        .lds-ellipsis div:nth-child(3) {
+            left: 32px;
+            animation: lds-ellipsis2 0.6s infinite;
+        }
+        .lds-ellipsis div:nth-child(4) {
+            left: 56px;
+            animation: lds-ellipsis3 0.6s infinite;
+        }
+        @keyframes lds-ellipsis1 {
+            0% {
+                transform: scale(0);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        @keyframes lds-ellipsis3 {
+            0% {
+                transform: scale(1);
+            }
+            100% {
+                transform: scale(0);
+            }
+        }
+        @keyframes lds-ellipsis2 {
+            0% {
+                transform: translate(0, 0);
+            }
+            100% {
+                transform: translate(24px, 0);
+            }
+        }
+
+    </style><noscript style="text-align: center; color: white; font-size: 16px; margin: 10px;">
+        Javascript notwendig, um diese Seite aufzurufen.
+    </noscript><div class="logo-wrapper-check"><a href="https://aniworld.to/" title="AniWorld.to / Animes online online ansehen und streamen!"><div class="header-logo-check"></div></a></div><h3 style="text-align: center; color: white; font-size: 32px; margin-top: 50px;">Browser Check (Anti Bot/Spam)</h3><div class="container" style="padding: 0;"><form method="GET" class="securityTokenForm"><input type="hidden" name="token" class="securityToken" /></form><div style="margin: 20px 0" id="captcha" align="center"></div></div><div style="text-align: center; font-size: 20px; color: #44adf3; margin-top: 20px;">Falls nötig, bestätige einmal, dass du kein Bot bist.</div><div style="text-align: center;color: white; font-size: 16px; margin-top: 25px">Deine Anfrage wurde als Spam erkannt. Gleich geht's weiter...</div><script>
+        $('.lds-ellipsis').click(function (){
+            location.reload();
+        });
+    </script><script type="text/javascript" src="/public/js/modernizr.custom.min.js?cache-version=1"></script><script type="text/javascript" src="/public/js/check.min.js"></script><script>
+        window.onloadTurnstileCallback = function () {
+            turnstile.render('#captcha', {
+                sitekey: '0x4AAAAAAAFBgO3lxH3LL-jC',
+                callback: function(t) {
+                    $('.securityToken').val(t);
+                    $('.securityTokenForm').submit();
+                },
+            });
+        };
+    </script><script>eval(atob('aWYgKCEoLyhhbml3b3JsZFwudG98YW5pY2xvdWRcLmlvKS9pLnRlc3QobG9jYXRpb24uaG9zdG5hbWUpKSl7CmFsZXJ0KCJXaWNodGlnOiBEdSBiaXN0IGF1ZiBlaW5lbiBGYWtlLUNsb25lIGhlcmVpbmdlZmFsbGVuLiBVbnRlciB3d3cuQW5pd29ybGQuRG9tYWlucyBmaW5kZXN0IGR1IGRpZSByaWNodGlnZW4gQWRyZXNzZW4uIER1IHdpcnN0IG51biB3ZWl0ZXJnZWxlaXRldC4iKTsKd2luZG93LmxvY2F0aW9uLnJlcGxhY2UoImh0dHBzOi8vYW5pd29ybGQudG8iICsgd2luZG93LmxvY2F0aW9uLnBhdGhuYW1lKTsKfQ=='));</script></body></html>

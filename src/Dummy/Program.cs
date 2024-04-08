@@ -7,8 +7,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-using System.Xml.Linq;
-
 
 namespace Dummy
 {
@@ -18,8 +16,9 @@ namespace Dummy
         {
             HttpClient client = new HttpClient();
 
-            var s = await GetAllFromLink(client, "https://aniworld.to/anime/stream/classroom-of-the-elite");
 
+            var s = await GetAllFromLink(client, "https://aniworld.to/anime/stream/classroom-of-the-elite");
+            await GetLinkInfo(client, s.Seasons[0].Series[0]);
             Console.WriteLine();
         }
 
@@ -105,10 +104,46 @@ namespace Dummy
 
         static async Task<SeasonInfo> GetAllFromLink(HttpClient client, string url)
         {
+            var i = CheckIfCaptiortest(await GetXml(client, url));
+            if (!i) new SeasonInfo(); 
             var info = await GetSeasonInfo(client, url);
             var movie = await GetAllSeason(client, url);
             info.Seasons = movie;
             return info;
+        }
+
+        static async Task GetLinkInfo(HttpClient client, Series info)
+        {
+            const string uri = "https://aniworld.to";
+            string i = uri + info.SeriesLink;
+            var xml = await GetXml(client, i);
+
+            var objectBox = xml.SelectSingleNode("//*[@class='hosterSiteVideo']");
+            var language = objectBox.SelectNodes("//*[@class='changeLanguageBox']//img");
+            //todo to get title and data-lang-key match with provider = data-lang-key
+            var key = (language.Item(0) as XmlElement)?.GetAttribute("data-lang-key");
+            var lang = (language.Item(0) as XmlElement)?.GetAttribute("title");
+
+
+            var providers = objectBox.SelectNodes("//*[@class='row']//li");
+            //todo to get name of every single href index to zero
+            providers.Item(0).SelectSingleNode("//h4");
+            var langKey = (providers.Item(0) as XmlElement)?.GetAttribute("data-lang-key");
+            var proLangKey = (providers.Item(0) as XmlElement)?.GetAttribute("data-link-target");
+
+            Console.WriteLine();
+        }
+
+        static bool CheckIfCaptiortest(XmlDocument doc)
+        {
+            var xml = doc.SelectSingleNode("//*[@class='securityToken']");
+
+            if (xml != null)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
     
