@@ -1,5 +1,6 @@
 ﻿using Akka.Actor;
 using Metflix.Services.Message;
+using Metflix.Utilities;
 
 namespace Metflix.Services
 {
@@ -9,10 +10,12 @@ namespace Metflix.Services
         public Worker()
         {
             _dummy.AddRange([1, 2, 3, 4, 5, 6]);
+            var i = new AniHttpClient();
 
-            Receive<WorkerMessageRequest>(mess =>
+            ReceiveAsync<WorkerMessageRequest>(async mess =>
             {
-                Sender.Tell(new WorkerMessage(_dummy));
+                var s = await i.GetAllFromContainer("/anime/stream/classroom-of-the-elite");
+                Self.Tell(new WorkerMessage(_dummy));
             });
         }
     }

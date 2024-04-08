@@ -16,11 +16,15 @@ namespace Dummy
     {
         static async Task Main(string[] args)
         {
-            HttpClient client = new HttpClient();
+            /*HttpClient client = new HttpClient();
 
             var s = await GetAllFromLink(client, "https://aniworld.to/anime/stream/classroom-of-the-elite");
 
-            Console.WriteLine();
+            string url = string.Join("", "https://aniworld.to", s.Image);
+            var response = await client.GetAsync(url);
+            var i = await response.Content.ReadAsByteArrayAsync();
+            var ss = Convert.ToBase64String(i);*/
+
         }
 
         static async Task<XmlDocument> GetXml(HttpClient client, string url)
