@@ -67,6 +67,21 @@ namespace Metflix.Utilities
             };
         }
 
+        /// <summary>
+        /// https://aniworld.to/search?q=isekai+to+
+        ///
+        /// Search for series
+        /// </summary>
+        /// <param name="search"></param>
+        /// <returns>List of</returns>
+        public async Task SearchForAnime(string search)
+        {
+            string searchUrl = "/search?q=";
+            // replace all space with + and all char like + = %2B or other char into Urlencoded // only special symbols
+            // https://www.webatic.com/ascii-table
+            //string convertSearch = search.Replace()
+        }
+
         #region Helper for get only SeriesLink infos
 
         /// <summary>
