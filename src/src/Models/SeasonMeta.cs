@@ -1,5 +1,6 @@
 ﻿namespace Metflix.Models
 {
+    [Serializable]
     public class SeasonMeta
     {
         public SeasonMeta()

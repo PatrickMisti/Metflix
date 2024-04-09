@@ -1,7 +1,7 @@
-﻿using System.Reflection.Metadata;
-
+﻿
 namespace Metflix.Models
 {
+    [Serializable]
     public class SeasonInfo
     {
         public SeasonInfo() { }

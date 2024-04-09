@@ -4,12 +4,17 @@ namespace Metflix.Utilities
 {
     public class HttpWrapper(string url) : IHttpWrapper
     {
-        protected readonly string _url = url;
+        protected readonly string Url = url;
         protected readonly HttpClient Client = new();
 
-        public async Task<XmlDocument> GetXmlDocument(string url)
+        /// <summary>
+        /// Response XmlDocument from WebSite
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns>XmlDocument</returns>
+        public async Task<XmlDocument> GetXmlDocument(string uri)
         {
-            HttpResponseMessage response = await Client.GetAsync(url);
+            HttpResponseMessage response = await Client.GetAsync(uri);
 
             Sgml.SgmlReader sgml = new Sgml.SgmlReader()
             {
@@ -22,6 +27,11 @@ namespace Metflix.Utilities
             XmlDocument doc = new XmlDocument();
             doc.Load(sgml);
             return doc;
+        }
+
+        public string CreateUrl(string uri,string merge = "")
+        {
+            return string.Join(merge, Url, uri);
         }
     }
 }

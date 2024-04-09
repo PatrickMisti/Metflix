@@ -1,10 +1,11 @@
 ﻿using System.Xml;
-using Metflix.Models;
 
 namespace Metflix.Utilities
 {
     public interface IHttpWrapper
     {
-        Task<XmlDocument> GetXmlDocument(string url);
+        Task<XmlDocument> GetXmlDocument(string uri);
+
+        string CreateUrl(string uri, string merge = "");
     }
 }
