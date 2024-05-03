@@ -1,4 +1,5 @@
-﻿using Metflix.Services.Akka;
+﻿using Akka.Actor;
+using Metflix.Services.Akka;
 using Metflix.Services.Message;
 using Microsoft.AspNetCore.Mvc;
 

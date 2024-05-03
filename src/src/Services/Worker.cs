@@ -14,8 +14,19 @@ namespace Metflix.Services
 
             ReceiveAsync<WorkerMessageRequest>(async mess =>
             {
-                var s = await i.GetAllFromElementAsync("/anime/stream/classroom-of-the-elite");
-                var info = await i.GetStreamAndLanguageFromSeriesAsync(s.Seasons[0].Series[0]);
+                try
+                {
+                    var s = await i.GetAllFromElementAsync("/anime/stream/classroom-of-the-elite");
+                    var info = await i.GetStreamAndLanguageFromSeriesAsync(s.Seasons[0].Series[0]);
+                    await i.SearchForAnime("classroom");
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+                await i.SearchForAnime("classroom++");
+
                 Self.Tell(new WorkerMessage(_dummy));
             });
         }

@@ -1,5 +1,6 @@
 ﻿using System.Xml;
 using Metflix.Models;
+using Metflix.Services.Exceptions;
 using Serilog;
 using Serilog.Core;
 
@@ -9,7 +10,10 @@ namespace Metflix.Utilities
     public class AniHttpClient() : HttpWrapper(AniUri)
     {
         public static readonly string AniUri = "https://aniworld.to";
-        private readonly Logger _logger = new LoggerConfiguration().CreateLogger();
+        private readonly Logger _logger = new LoggerConfiguration()
+            .WriteTo.Console(outputTemplate: "[{CorrelationId}] {Message}{NewLine}")
+            .MinimumLevel.Debug()
+            .CreateLogger();
 
         /// <summary>
         /// Get all data from series link
@@ -21,20 +25,26 @@ namespace Metflix.Utilities
         /// <returns>SeasonMeta</returns>
         public async Task<SeasonMeta> GetAllFromElementAsync(string uri)
         {
-            // create url and get Xml
-            var doc = await GetXmlDocument(CreateUrl(uri));
-            // return SeasonInfo
-            var seasonInfo = await GetSeasonInfoAsync(doc);
-            // return List of Season
-            var seasonList = await GetAllSeasons(doc);
-
-            // todo maybe make own ExceptionHandling
-            _logger.Debug("Create new SeasonMeta with info and list");
-            return new SeasonMeta
+            try
             {
-                Info = seasonInfo,
-                Seasons = seasonList
-            };
+                // create url and get Xml
+                var doc = await GetXmlDocument(uri);
+                // return SeasonInfo
+                var seasonInfo = await GetSeasonInfoAsync(doc);
+                // return List of Season
+                var seasonList = await GetAllSeasons(doc);
+
+                _logger.Debug("Create new SeasonMeta with info and list");
+                return new SeasonMeta
+                {
+                    Info = seasonInfo,
+                    Seasons = seasonList
+                };
+            }
+            catch (Exception e)
+            {
+                throw new SeriesListNotFoundException("Series exceptions!", e);
+            }
         }
 
         /// <summary>
@@ -44,27 +54,31 @@ namespace Metflix.Utilities
         /// <returns>SeriesInfo</returns>
         public async Task<SeriesInfo> GetStreamAndLanguageFromSeriesAsync(Series series)
         {
-            var xmlDoc = await GetXmlDocument(CreateUrl(series.SeriesUrl));
-            var hostedSiteVideo = xmlDoc.SelectSingleNode("//*[@class='hosterSiteVideo']");
-
-            if (hostedSiteVideo == null)
+            try
             {
-                // todo maybe make own ExceptionHandling
-                _logger.Error("Could not find hosted site info");
-                return new SeriesInfo();
+                var xmlDoc = await GetXmlDocument(series.SeriesUrl);
+                var hostedSiteVideo = xmlDoc.SelectSingleNode("//*[@class='hosterSiteVideo']");
+
+                if (hostedSiteVideo == null)
+                    throw new StreamLinkNotFoundException("Could not find hosted site info");
+                
+
+                // ask for language and stream list's
+                var languageList = GetSeriesLanguageList(hostedSiteVideo);
+                var streamList = GetSeriesStreamLinks(hostedSiteVideo);
+
+                _logger.Debug("Create SeriesInfo for response");
+
+                return new SeriesInfo
+                {
+                    Languages = languageList,
+                    StreamLinks = streamList
+                };
             }
-
-            // ask for language and stream list's
-            var languageList = GetSeriesLanguageList(hostedSiteVideo);
-            var streamList = GetSeriesStreamLinks(hostedSiteVideo);
-
-            _logger.Debug("Create SeriesInfo for response");
-
-            return new SeriesInfo
+            catch (Exception e)
             {
-                Languages = languageList,
-                StreamLinks = streamList
-            };
+                throw new StreamLinkNotFoundException("Stream not found!", e);
+            }
         }
 
         /// <summary>
@@ -74,12 +88,17 @@ namespace Metflix.Utilities
         /// </summary>
         /// <param name="search"></param>
         /// <returns>List of</returns>
-        public async Task SearchForAnime(string search)
+        public async Task<Dictionary<string, Uri>> SearchForAnime(string search)
         {
-            string searchUrl = "/search?q=";
+            string searchUrl = "/search?q=" + Uri.EscapeDataString(search);
             // replace all space with + and all char like + = %2B or other char into Urlencoded // only special symbols
             // https://www.webatic.com/ascii-table
             //string convertSearch = search.Replace()
+            _logger.Information("search string is for {0}",searchUrl);
+            var xml = await GetXmlDocument(searchUrl);
+            var list = xml.SelectNodes("//*[@id='searchResults']");
+            Console.WriteLine();
+            throw new Exception();
         }
 
         #region Helper for get only SeriesLink infos
@@ -97,7 +116,7 @@ namespace Metflix.Utilities
             if (rawLanguageBox == null)
             {
                 _logger.Error("Could not find languageBox");
-                return new List<SeriesLanguage>();
+                throw new SeriesLanguageNotFoundException("Could not found xml!");
             }
             // <img src="/public/img/japanese-english.svg"
             // alt="Englische Sprache, English, Flagge, Sprache"
@@ -105,23 +124,30 @@ namespace Metflix.Utilities
             // title="mit Untertitel Englisch">
             var list = new List<SeriesLanguage>();
 
-            foreach (XmlElement element in rawLanguageBox)
+            try
             {
-                // get title and lang key from xml
-                var languageTitle = element?.GetAttribute("title");
-                string langKeyRaw = element?.GetAttribute("data-lang-key") ?? "Nan";
-                int.TryParse(langKeyRaw, out var languageKey);
-
-                list.Add(new SeriesLanguage
+                foreach (XmlElement element in rawLanguageBox)
                 {
-                    LanguageCode = languageTitle ?? "Default",
-                    LanguageKey = languageKey
-                });
+                    // get title and lang key from xml
+                    var languageTitle = element?.GetAttribute("title");
+                    string langKeyRaw = element?.GetAttribute("data-lang-key") ?? "Nan";
+                    int.TryParse(langKeyRaw, out var languageKey);
+
+                    list.Add(new SeriesLanguage
+                    {
+                        LanguageCode = languageTitle ?? "Default",
+                        LanguageKey = languageKey
+                    });
+                }
+
+                _logger.Debug("Resolve all languages");
+
+                return list;
             }
-
-            _logger.Debug("Resolve all languages");
-
-            return list;
+            catch (Exception e)
+            {
+                throw new SeriesLanguageNotFoundException("Could not fill language to series link", e);
+            }
         }
 
         /// <summary>
@@ -137,33 +163,39 @@ namespace Metflix.Utilities
             if (rawStreamLinks == null)
             {
                 _logger.Error("Could not find stream links");
-                return new List<SeriesStreamLink>();
+                throw new SeriesListNotFoundException("Could not get xml!");
             }
 
             var list = new List<SeriesStreamLink>();
 
-            foreach (XmlElement element in rawStreamLinks)
+            try
             {
-                // result step into the element for href and h4 innerText
-                var result = (element.SelectSingleNode("//div/*[@class='watchEpisode']") as XmlElement);
-                var streamLink = result?.GetAttribute("href");
-                var provider = result?.SelectSingleNode("//h4")?.InnerText;
-                // data-lang-key is in the li tag
-                var langKeyRaw = element?.GetAttribute("data-lang-key");
-                int.TryParse(langKeyRaw,out var languageKey);
-
-                // todo create own Exception
-                list.Add(new SeriesStreamLink
+                foreach (XmlElement element in rawStreamLinks)
                 {
-                    IframeLink = streamLink ?? "Default",
-                    LinkType = provider ?? "Default",
-                    LanguageKey = languageKey
-                });
+                    // result step into the element for href and h4 innerText
+                    var result = (element.SelectSingleNode("//div/*[@class='watchEpisode']") as XmlElement);
+                    var streamLink = result?.GetAttribute("href");
+                    var provider = result?.SelectSingleNode("//h4")?.InnerText;
+                    // data-lang-key is in the li tag
+                    var langKeyRaw = element?.GetAttribute("data-lang-key");
+                    int.TryParse(langKeyRaw, out var languageKey);
+
+                    list.Add(new SeriesStreamLink
+                    {
+                        IframeLink = streamLink ?? "Default",
+                        LinkType = provider ?? "Default",
+                        LanguageKey = languageKey
+                    });
+                }
+
+                _logger.Debug("Resolve all stream links");
+
+                return list;
             }
-
-            _logger.Debug("Resolve all stream links");
-
-            return list;
+            catch (Exception e)
+            {
+                throw new SeriesListNotFoundException("Could not fill series", e);
+            }
         }
 
         #endregion
@@ -181,7 +213,7 @@ namespace Metflix.Utilities
                 XmlNodeList? seriesInfo = xml.SelectNodes("//*[@id='series']");
 
                 if (seriesInfo == null)
-                    throw new Exception("Series info not found!");
+                    throw new SeriesInfoNotFoundException("Series info not found!");
 
                 _logger.Debug("Could found data!");
 
@@ -205,8 +237,7 @@ namespace Metflix.Utilities
             }
             catch (Exception e)
             {
-                _logger.Error("Could not get all infos from Season!!", e);
-                return new SeasonInfo();
+                throw new SeriesInfoNotFoundException("Could not get all infos from Season!!", e);
             }
         }
 
@@ -225,7 +256,8 @@ namespace Metflix.Utilities
             var seasons = new List<Season>();
 
             // check if XmlNodeList is not null
-            if (seasonList == null) return seasons;
+            if (seasonList == null)
+                throw new SeasonLinkNotFoundException("Season list ist empty");
 
             foreach (XmlElement element in seasonList)
             {
@@ -256,9 +288,9 @@ namespace Metflix.Utilities
             };
 
             if (string.IsNullOrEmpty(season.SeasonUrl))
-                return season;
+                throw new SeasonLinkNotFoundException("Season link is null");
 
-            var seriesListDoc = await GetXmlDocument(CreateUrl(season.SeasonUrl));
+            var seriesListDoc = await GetXmlDocument(season.SeasonUrl);
             // Get list of links for every single series
             XmlNodeList? seriesListRef = seriesListDoc.SelectNodes("//*[@id='stream']//ul")
                 ?.Item(1)
@@ -308,7 +340,7 @@ namespace Metflix.Utilities
         /// <returns>byte[]</returns>
         private async Task<byte[]> ConvertImageStringToBlob(string url)
         {
-            var response = await Client.GetAsync(CreateUrl(url));
+            var response = await Client.GetAsync(url);
             try
             {
                 _logger.Debug("Convert image to byte array!");
@@ -316,8 +348,7 @@ namespace Metflix.Utilities
             }
             catch (Exception e)
             {
-                _logger.Error("Could not convert url to byte[]", e);
-                return [];
+                throw new ArgumentException("Could not convert url to byte[]", e);
             }
         }
         #endregion

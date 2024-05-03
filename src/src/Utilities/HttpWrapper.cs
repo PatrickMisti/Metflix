@@ -1,11 +1,15 @@
-﻿using System.Xml;
+﻿using System.Net;
+using System.Xml;
 
 namespace Metflix.Utilities
 {
     public class HttpWrapper(string url) : IHttpWrapper
     {
         protected readonly string Url = url;
-        protected readonly HttpClient Client = new();
+        protected readonly HttpClient Client = new()
+        {
+            BaseAddress = new Uri(url)
+        };
 
         /// <summary>
         /// Response XmlDocument from WebSite
@@ -33,5 +37,8 @@ namespace Metflix.Utilities
         {
             return string.Join(merge, Url, uri);
         }
+
+        public static string ConvertSearchToUriEncoding(string search) 
+            => Uri.EscapeDataString(search);
     }
 }
