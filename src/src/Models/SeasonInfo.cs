@@ -2,7 +2,7 @@
 namespace Metflix.Models
 {
     [Serializable]
-    public class SeasonInfo
+    public record SeasonInfo
     {
         public SeasonInfo() { }
 

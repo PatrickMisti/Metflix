@@ -16,16 +16,28 @@ namespace Metflix.Utilities
         /// </summary>
         /// <param name="uri"></param>
         /// <returns>XmlDocument</returns>
+        public async Task<XmlDocument> GetXmlDocumentStream(string uri)
+        {
+            Client.Timeout = TimeSpan.FromMicroseconds(500);
+            HttpResponseMessage response = await Client.GetAsync(uri);
+            return ConvertResponseToXml(await response.Content.ReadAsStreamAsync());
+        }
+
         public async Task<XmlDocument> GetXmlDocument(string uri)
         {
             HttpResponseMessage response = await Client.GetAsync(uri);
 
+            return ConvertResponseToXml(await response.Content.ReadAsStreamAsync());
+        }
+
+        private XmlDocument ConvertResponseToXml(Stream byteStream)
+        {
             Sgml.SgmlReader sgml = new Sgml.SgmlReader()
             {
                 DocType = "HTML",
                 WhitespaceHandling = WhitespaceHandling.All,
                 CaseFolding = Sgml.CaseFolding.ToLower,
-                InputStream = new StreamReader(await response.Content.ReadAsStreamAsync())
+                InputStream = new StreamReader(byteStream)
             };
 
             XmlDocument doc = new XmlDocument();

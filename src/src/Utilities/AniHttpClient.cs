@@ -1,4 +1,5 @@
-﻿using System.Xml;
+﻿using System.Net;
+using System.Xml;
 using Metflix.Models;
 using Metflix.Services.Exceptions;
 using Serilog;
@@ -96,7 +97,8 @@ namespace Metflix.Utilities
             //string convertSearch = search.Replace()
             _logger.Information("search string is for {0}",searchUrl);
             var xml = await GetXmlDocument(searchUrl);
-            var list = xml.SelectNodes("//*[@id='searchResults']");
+            
+            var list = xml.SelectNodes("//*[@id='searchResults']");// //a
             Console.WriteLine();
             throw new Exception();
         }
@@ -210,7 +212,7 @@ namespace Metflix.Utilities
         {
             try
             {
-                XmlNodeList? seriesInfo = xml.SelectNodes("//*[@id='series']");
+                XmlNode? seriesInfo = xml.SelectNodes("//*[@id='series']")?.Item(0);
 
                 if (seriesInfo == null)
                     throw new SeriesInfoNotFoundException("Series info not found!");
@@ -218,21 +220,20 @@ namespace Metflix.Utilities
                 _logger.Debug("Could found data!");
 
                 // find div with class backdrop
-                XmlElement? image = seriesInfo.Item(0)?.SelectSingleNode("//*[@class='backdrop']") as XmlElement;
-                // find title in innerText
-                XmlNode? title = seriesInfo.Item(0)?.SelectSingleNode("//*[@class='series-title']/h1/span");
-                // find description in innerText
-                XmlNode? des = seriesInfo.Item(0)?.SelectSingleNode("//*[@class='seri_des']");
-
-                string imageResult = image != null ? GetImageUrl(image.GetAttribute("style")) : "";
+                XmlElement? image = seriesInfo.SelectSingleNode("//*[@class='backdrop']") as XmlElement;
+                string? imageResult = Converts.GetImageUrl(image?.GetAttribute("style"));
 
                 _logger.Debug("Create SeasonInfo and fill it");
 
-                return new SeasonInfo()
+                return new SeasonInfo
                 {
-                    Title = title?.InnerText ?? "Not Found",
-                    Description = des?.InnerText ?? "NotFount",
-                    Image = await ConvertImageStringToBlob(imageResult)
+                    // find title in innerText
+                    Title = seriesInfo?.SelectSingleNode("//*[@class='series-title']/h1/span")
+                        ?.InnerText ?? "Not Found",
+                    // find description in innerText
+                    Description = seriesInfo?.SelectSingleNode("//*[@class='seri_des']")
+                        ?.InnerText ?? "NotFount",
+                    Image = await Converts.ConvertImageStringToBlob(Client, imageResult)
                 };
             }
             catch (Exception e)
@@ -300,7 +301,7 @@ namespace Metflix.Utilities
 
             // get all series of element
             foreach (XmlElement element in seriesListRef)
-                season.Series.Add(new Series()
+                season.Series.Add(new Series
                 {
                     SeriesNumber = element.InnerText,
                     SeriesUrl = element.GetAttribute("href")
@@ -309,47 +310,6 @@ namespace Metflix.Utilities
             _logger.Debug("Got all info from one season");
 
             return season;
-        }
-
-        /// <summary>
-        /// Get attribute from div
-        /// Attribute is style
-        /// get link from style: 'background: url('link you need')'
-        /// cut out only link
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns>string</returns>
-        private string GetImageUrl(string url)
-        {
-            // index from where you cut out the string
-            const string toCut = "url(";
-            var imageFrom = url?.IndexOf(toCut) + toCut.Length;
-
-            if (string.IsNullOrEmpty(url) || imageFrom < 0) return "";
-            // remove till url( <- 
-            var imageResult = url.Substring((int)imageFrom!);
-            // remove last element -> )
-            _logger.Debug("String is read for downloading image");
-            return imageResult.Substring(0, imageResult.Length - 1);
-        }
-
-        /// <summary>
-        /// Convert image link to byte array for db
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns>byte[]</returns>
-        private async Task<byte[]> ConvertImageStringToBlob(string url)
-        {
-            var response = await Client.GetAsync(url);
-            try
-            {
-                _logger.Debug("Convert image to byte array!");
-                return await response.Content.ReadAsByteArrayAsync();
-            }
-            catch (Exception e)
-            {
-                throw new ArgumentException("Could not convert url to byte[]", e);
-            }
         }
         #endregion
     }
