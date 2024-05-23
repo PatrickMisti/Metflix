@@ -1,16 +1,18 @@
-﻿using System.Net;
+﻿using System.Text.Json;
 using System.Xml;
 using Metflix.Models;
 using Metflix.Services.Exceptions;
+using Metflix.Utilities;
 using Serilog;
 using Serilog.Core;
 
 
-namespace Metflix.Utilities
+namespace Metflix.HttpWrappers
 {
-    public class AniHttpClient() : HttpWrapper(AniUri)
+    public class AniHttpClient(string? basicUrl = null) : HttpWrapper(basicUrl ?? AniUri)
     {
-        public static readonly string AniUri = "https://aniworld.to";
+        private static readonly string AniUri = "https://aniworld.to";
+        private readonly string _searchPath = "/ajax/search";
         private readonly Logger _logger = new LoggerConfiguration()
             .WriteTo.Console(outputTemplate: "[{CorrelationId}] {Message}{NewLine}")
             .MinimumLevel.Debug()
@@ -62,7 +64,7 @@ namespace Metflix.Utilities
 
                 if (hostedSiteVideo == null)
                     throw new StreamLinkNotFoundException("Could not find hosted site info");
-                
+
 
                 // ask for language and stream list's
                 var languageList = GetSeriesLanguageList(hostedSiteVideo);
@@ -95,13 +97,19 @@ namespace Metflix.Utilities
             // replace all space with + and all char like + = %2B or other char into Urlencoded // only special symbols
             // https://www.webatic.com/ascii-table
             //string convertSearch = search.Replace()
-            _logger.Information("search string is for {0}",searchUrl);
-            var xml = await GetXmlDocument(searchUrl);
-            
-            var list = xml.SelectNodes("//*[@id='searchResults']");// //a
+            _logger.Information("search string is for {0}", searchUrl);
+            //var xml = null;
+
+            //var list = xml.SelectNodes("//*[@id='searchResults']");// //a
             Console.WriteLine();
             throw new Exception();
         }
+
+        public record SearchEntry(string title, string description, string link);
+
+        public async Task<IList<SearchEntry>> SearchForSeriesAsync(string search)
+            => await SearchWithFormDataAsync<SearchEntry>(_searchPath, "keyword", search);
+
 
         #region Helper for get only SeriesLink infos
 
@@ -175,7 +183,7 @@ namespace Metflix.Utilities
                 foreach (XmlElement element in rawStreamLinks)
                 {
                     // result step into the element for href and h4 innerText
-                    var result = (element.SelectSingleNode("//div/*[@class='watchEpisode']") as XmlElement);
+                    var result = element.SelectSingleNode("//div/*[@class='watchEpisode']") as XmlElement;
                     var streamLink = result?.GetAttribute("href");
                     var provider = result?.SelectSingleNode("//h4")?.InnerText;
                     // data-lang-key is in the li tag

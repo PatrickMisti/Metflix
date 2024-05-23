@@ -1,6 +1,6 @@
 ﻿using System.Xml;
 
-namespace Metflix.Utilities
+namespace Metflix.HttpWrappers
 {
     public interface IHttpWrapper
     {
