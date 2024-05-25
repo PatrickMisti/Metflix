@@ -1,6 +1,6 @@
 ﻿using Akka.Actor;
+using Metflix.HttpWrappers;
 using Metflix.Services.Message;
-using Metflix.Utilities;
 
 namespace Metflix.Services
 {
@@ -16,11 +16,11 @@ namespace Metflix.Services
             {
                 try
                 {
-                    //var s = await i.GetAllFromElementAsync("/anime/stream/classroom-of-the-elite");
-                    //var info = await i.GetStreamAndLanguageFromSeriesAsync(s.Seasons[0].Series[0]);
+                    var s = await i.GetDataFromSeriesAsync("/anime/stream/classroom-of-the-elite");
+                    var info = await i.GetStreamAndLanguageFromSeriesAsync(s.Series[0]);
                     //await i.SearchForAnime("classroom");
-                    await i.SearchForSeriesAsync("classroom");
-
+                    //var s = await i.SearchForSeriesAsync("classroom");
+                    Console.WriteLine("asdf");
                 }
                 catch (Exception e)
                 {

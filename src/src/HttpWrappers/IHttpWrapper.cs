@@ -1,11 +1,7 @@
-﻿using System.Xml;
+﻿namespace Metflix.HttpWrappers;
 
-namespace Metflix.HttpWrappers
+public interface IHttpWrapper
 {
-    public interface IHttpWrapper
-    {
-        Task<XmlDocument> GetXmlDocument(string uri);
-
-        string CreateUrl(string uri, string merge = "");
-    }
+    Task<Stream> GetAllAsync(string uri);
+    Task<IList<T>> SearchWithFormDataAsync<T>(string path, string key, string search);
 }

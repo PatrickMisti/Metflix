@@ -1,4 +1,7 @@
-﻿namespace Metflix.Utilities
+﻿using Sgml;
+using System.Xml;
+
+namespace Metflix.Utilities
 {
     public static class Converts
     {
@@ -39,6 +42,34 @@
             catch (Exception e)
             {
                 throw new ArgumentException("Could not convert url to byte[]", e);
+            }
+        }
+
+        /// <summary>
+        /// Get stream from client and convert it to xml doc
+        /// </summary>
+        /// <param name="byteStream"></param>
+        /// <returns></returns>
+        /// <exception cref="XmlException"></exception>
+        public static XmlDocument ConvertHttpToXml(Stream byteStream)
+        {
+            try
+            {
+                SgmlReader sgml = new()
+                {
+                    DocType = "HTML",
+                    WhitespaceHandling = WhitespaceHandling.All,
+                    CaseFolding = CaseFolding.ToLower,
+                    InputStream = new StreamReader(byteStream)
+                };
+
+                XmlDocument doc = new();
+                doc.Load(sgml);
+                return doc;
+            }
+            catch (Exception e)
+            {
+                throw new XmlException("Could not convert stream to xml doc!", e);
             }
         }
     }
