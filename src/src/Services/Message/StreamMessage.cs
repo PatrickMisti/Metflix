@@ -5,7 +5,7 @@ namespace Metflix.Services.Message
 {
     public class PopularityMessageRequest : IStreamMessage
     {
-        public static PopularityMessageRequest Instance => new PopularityMessageRequest();
+        public static PopularityMessageRequest Instance => new();
     }
 
     public class PopularityMessageResponse : IStreamMessage
