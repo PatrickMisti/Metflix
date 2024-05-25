@@ -117,5 +117,30 @@ namespace Metflix.Utilities
             return result;
         }
         #endregion
+
+        #region Popularity Links
+
+        public static IEnumerable<(string title, string category, string url, string imgUrl)> SearchForPopularityTitle(this XmlDocument xml)
+        {
+            XmlNodeList? containerSeries = xml.SelectNodes("//*[@class='seriesListContainer row']//a");
+
+            if (containerSeries == null) throw new XmlException("Not Found popularity tree!");
+
+            foreach (XmlElement element in containerSeries)
+            {
+                var link = element?.GetAttribute("href");
+                var category = element?.SelectSingleNode("*//small")?.InnerText;
+                var title = element?.SelectSingleNode("*//h3")?.InnerText;
+                var rawImage = element?.SelectSingleNode("*//img");
+                var image = (rawImage as XmlElement)?.GetAttribute("src");
+
+                if (category.IsEmpty() || title.IsEmpty() || image.IsEmpty() || link.IsEmpty())
+                    throw new XmlException("Could not find and popularity series!");
+
+                yield return (title!, category!, link!, image!);
+            }
+        }
+
+        #endregion
     }
 }

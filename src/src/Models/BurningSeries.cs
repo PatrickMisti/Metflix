@@ -10,4 +10,6 @@ public record StreamInfoLinks(string LanguageTitle, IList<StreamLink>  StreamLin
 
 public record Series(string Season, string Episode, string Url);
 
-public record SeriesInfo(string Title, string Description, byte[] image, IImmutableList<Series> Series);
+public record SeriesInfo(string Title, string Description, byte[] Image, IImmutableList<Series> Series);
+
+public record PopularitySeries(string Title, string Category, string Url ,byte[] Image);

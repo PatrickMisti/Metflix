@@ -11,6 +11,8 @@ namespace Metflix.HttpWrappers
     public class AniHttpClient(string basicUrl) : HttpWrapper(basicUrl)
     {
         private readonly string _searchPath = "/ajax/search";
+        private readonly string _popularityPath = "/beliebte-animes";
+
         private readonly Logger _logger = new LoggerConfiguration()
             .WriteTo.Console()
             .MinimumLevel.Debug()
@@ -86,5 +88,28 @@ namespace Metflix.HttpWrappers
         /// <returns>List of SearchEntry</returns>
         public async Task<IList<SearchEntry>> SearchForSeriesAsync(string search)
             => await SearchWithFormDataAsync<SearchEntry>(_searchPath, "keyword", search);
+
+        public async Task<IImmutableList<PopularitySeries>> GetPopularityTitle()
+        {
+            var response = await GetAllAsync(_popularityPath);
+            var xml = Converts.ConvertHttpToXml(response);
+
+            if (xml == null) throw new XmlException("Could not found popularity page!");
+
+            var result = xml.SearchForPopularityTitle();
+            var resultList = new List<PopularitySeries>();
+
+            foreach (var element in result)
+            {
+                var image = await Converts.ConvertImageStringToBlob(Client, element.imgUrl);
+                resultList.Add(new PopularitySeries(
+                    element.title,
+                    element.category,
+                    element.url,
+                    image));
+            }
+
+            return resultList.ToImmutableList();
+        }
     }
 }
