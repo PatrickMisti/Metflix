@@ -20,12 +20,5 @@ namespace Metflix.Controllers
 
             return result.Series.ToList();
         }
-
-        // POST api/<AkkaController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-            bridge.Tell(value);
-        }
     }
 }
