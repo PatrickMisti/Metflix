@@ -4,11 +4,14 @@ namespace Metflix.HttpWrappers
 {
     public class HttpWrapper(string url) : IHttpWrapper
     {
+        private readonly JsonSerializerOptions _defaultOptions = new() { PropertyNameCaseInsensitive = true };
+
         protected readonly HttpClient Client = new()
         {
-            BaseAddress = new Uri(url)
+            BaseAddress = new Uri(url),
+            Timeout = TimeSpan.FromSeconds(5) // not sure if too much
         };
-        private readonly JsonSerializerOptions _defaultOptions = new() { PropertyNameCaseInsensitive = true };
+        
 
         /// <summary>
         /// Get all from uri

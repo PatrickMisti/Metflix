@@ -8,12 +8,11 @@ using Serilog.Core;
 
 namespace Metflix.HttpWrappers
 {
-    public class AniHttpClient(string? basicUrl = null) : HttpWrapper(basicUrl ?? AniUri)
+    public class AniHttpClient(string basicUrl) : HttpWrapper(basicUrl)
     {
-        private static readonly string AniUri = "https://aniworld.to";
         private readonly string _searchPath = "/ajax/search";
         private readonly Logger _logger = new LoggerConfiguration()
-            .WriteTo.Console(outputTemplate: "[{CorrelationId}] {Message}{NewLine}")
+            .WriteTo.Console()
             .MinimumLevel.Debug()
             .CreateLogger();
 
@@ -36,6 +35,8 @@ namespace Metflix.HttpWrappers
             (string title,string des, string image) infoRes = info.SearchInfoFromSeries();
 
             var seasons = xml.GetSeriesNodeFromXml().SearchForAllSeason();
+
+            _logger.Debug("Collect all Infos for Series!");
 
             return new SeriesInfo(infoRes.title, 
                 infoRes.des,
@@ -67,10 +68,9 @@ namespace Metflix.HttpWrappers
             var response = await GetAllAsync(series.Url);
             var xml = Converts.ConvertHttpToXml(response);
 
-            if (xml == null)
-            {
-                throw new Exception();
-            }
+            if (xml == null) throw new Exception();
+
+            _logger.Debug("Collect all Data from Stream!");
 
             return xml.GetStreamLinkInfoFromXml().ToList();
         }
