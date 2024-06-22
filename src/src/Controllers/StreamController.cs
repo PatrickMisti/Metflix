@@ -1,4 +1,5 @@
-﻿using Metflix.Models;
+﻿using Metflix.Controllers.helpers;
+using Metflix.Models;
 using Metflix.Services.Akka;
 using Metflix.Services.Message;
 using Microsoft.AspNetCore.Mvc;
@@ -37,10 +38,8 @@ namespace Metflix.Controllers
             return result!.Series.ToList();
         }
 
-        public record SeriesUrl(string url);
-
-        [HttpPut]
-        [Route("Series")]
+        [HttpPost]
+        [Route("Series")]   
         public async Task<SeriesInfo> GetSeriesInfoFromUrl(SeriesUrl data)
         {
             var result = await bridge.Ask<SeriesInfoResponse>(new SeriesInfoRequest(data.url));

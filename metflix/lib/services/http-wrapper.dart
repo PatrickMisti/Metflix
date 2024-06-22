@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:metflix/model/popularity.dart';
@@ -29,12 +30,15 @@ class HttpWrapper {
       debugPrint(jsonEncode(SeriesUrl(url)..toJson()));
       debugPrint(Uri.http(baseUrl, _series).toString());
       var result = await http
-          .put(Uri.http(baseUrl, _series),
+          .post(Uri.http(baseUrl, _series),
               headers: <String, String>{'Content-Type': 'application/json'},
               body: jsonEncode(SeriesUrl(url)..toJson()))
           .then((response) {
         var element = jsonDecode(response.body);
         return SeriesInfo.fromJson(element as Map<String, dynamic>);
+      }).catchError((onError) {
+        debugPrint(onError);
+        return SeriesInfo(title: "", description: "", image: Uint8List(0), series: []);
       });
 
       return result;
