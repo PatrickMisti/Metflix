@@ -35,6 +35,23 @@ namespace Metflix.Services.Bag
                     Sender.Tell(new PopularityMessageResponse(e));
                 }
             });
+
+            Receive<SeriesInfoRequest>(m =>
+            {
+                try
+                {
+                    _logger.Debug("Get series from url!");
+                    var i = _client.GetDataFromSeriesAsync(m.Url).Result;
+                    _logger.Debug("Send data to rest point before");
+                    Sender.Tell(new SeriesInfoResponse(i));
+                    _logger.Debug("Send data to rest point");
+                }
+                catch (Exception e)
+                {
+                    _logger.Error("Could not get Series from url!",e);
+                    Sender.Tell(new SeriesInfoResponse(e));
+                }
+            });
         }
 
 

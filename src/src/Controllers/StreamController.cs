@@ -36,5 +36,19 @@ namespace Metflix.Controllers
 
             return result!.Series.ToList();
         }
+
+        [HttpPost]
+        [Route("GetSeries")]
+        public async Task<SeriesInfo> GetSeriesInfoFromUrl(string url)
+        {
+            var result = await bridge.Ask<SeriesInfoResponse>(new SeriesInfoRequest(url));
+
+            if (result.Success != null)
+                throw new BadHttpRequestException(result.Success.Message);
+
+
+            return result.Info!;
+        }
+
     }
 }

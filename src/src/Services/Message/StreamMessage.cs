@@ -24,4 +24,27 @@ namespace Metflix.Services.Message
 
         public Exception? Success { get; set; }
     }
+
+    public class SeriesInfoRequest(string url) : IStreamMessage
+    {
+        public string Url { get; set; } = url;
+    }
+
+    public class SeriesInfoResponse : IStreamMessage
+    {
+        public SeriesInfoResponse(){}
+
+        public SeriesInfoResponse(SeriesInfo info)
+        {
+            Info = info;
+        }
+
+        public SeriesInfoResponse(Exception exception)
+        {
+            Success = exception;
+        }
+
+        public Exception? Success { get; set; }
+        public SeriesInfo? Info { get; set; }
+    }
 }
