@@ -1,6 +1,6 @@
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
-import 'package:metflix/navbar.model.dart';
+import 'package:metflix/components/navbar/navbar.model.dart';
 import 'package:metflix/util/view-model-builder.dart';
 
 class NavbarComponent extends ViewModelBuilder<NavbarModel> {
@@ -38,17 +38,17 @@ class NavbarComponent extends ViewModelBuilder<NavbarModel> {
   Drawer getDrawer(NavbarModel model) => Drawer(
         child: ListView(
             padding: EdgeInsets.zero,
-            children: model.navi.map((element) {
-              return ListTile(
-                title: Text(element.name),
-                leading: Icon(element.icon),
-                selected: model.currentIndex == element.id,
-                onTap: () {
-                  model.setPage(element.id);
-                  model.popNavigation();
-                },
-              );
-            }).toList()),
+            children: model.navi
+                .map((element) => ListTile(
+                      title: Text(element.name),
+                      leading: Icon(element.icon),
+                      selected: model.currentIndex == element.id,
+                      onTap: () {
+                        model.setPage(element.id);
+                        model.popNavigation();
+                      },
+                    ))
+                .toList()),
       );
 
   @override

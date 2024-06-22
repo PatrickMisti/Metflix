@@ -1,13 +1,13 @@
 
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:metflix/model/utilities.dart';
 import 'package:metflix/router.config.dart';
+import 'package:metflix/util/service-config.dart';
+import 'package:metflix/util/view-model-builder.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-class NavbarModel extends ChangeNotifier {
+class NavbarModel extends BaseModel {
   final BuildContext _context;
   int _currentIndex = 0;
   String get appBarTitle => "Metflix";
@@ -49,7 +49,10 @@ class NavbarModel extends ChangeNotifier {
 
   void openDrawer() => Scaffold.of(_context).openDrawer();
 
-  updateDisplaySize() {
-    debugPrint("hallo");
+  @override
+  void dispose() {
+    ServiceConfig.unregisterAll();
+    super.dispose();
   }
+
 }

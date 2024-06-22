@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:metflix/model/popularity.dart';
+import 'package:metflix/router.config.dart';
 
 class PopularItem extends StatelessWidget {
   final defaultImage = "lib/assets/no-image.png";
   final PopularitySeries model;
+  final Function(String url) goTo;
 
-  const PopularItem({super.key, required this.model});
+  const PopularItem({super.key, required this.model, required this.goTo});
 
   Widget get getImage {
     if (model.image != null) {
@@ -14,14 +17,15 @@ class PopularItem extends StatelessWidget {
     return Image.asset(defaultImage);
   }
 
-  void onClick() {
+  void onClick(BuildContext context) {
     debugPrint(model.title);
+    goTo(model.url);
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onClick,
+      onTap: () => onClick(context),
       child: Card(
         child: SafeArea(
           child: Column(

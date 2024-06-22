@@ -12,6 +12,7 @@ builder.Services.AddSwaggerGen();
 // creates instance of IPublicHashingService that can be accessed by ASP.NET
 builder.Services.AddSingleton<IActorBridge, HubService>();
 // starts the IHostedService, which creates the ActorSystem and actors
+builder.Services.AddMemoryCache();
 builder.Services.AddHostedService(sp => (HubService)sp.GetRequiredService<IActorBridge>());
 
 var app = builder.Build();
