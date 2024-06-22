@@ -67,7 +67,12 @@ namespace Metflix.HttpWrappers
         /// <returns>SeriesInfo</returns>
         public async Task<IList<StreamInfoLinks>> GetStreamAndLanguageFromSeriesAsync(Series series)
         {
-            var response = await GetAllAsync(series.Url);
+            return await GetStreamAndLanguageFromUrlAsync(series.Url);
+        }
+
+        public async Task<IList<StreamInfoLinks>> GetStreamAndLanguageFromUrlAsync(string url)
+        {
+            var response = await GetAllAsync(url);
             var xml = Converts.ConvertHttpToXml(response);
 
             if (xml == null) throw new Exception();

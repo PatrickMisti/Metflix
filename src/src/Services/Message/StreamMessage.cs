@@ -47,4 +47,27 @@ namespace Metflix.Services.Message
         public Exception? Success { get; set; }
         public SeriesInfo? Info { get; set; }
     }
+
+    public class StreamMessageRequest(Series series) : IStreamMessage
+    {
+        public Series Series { get; set; } = series;
+    }
+
+    public class StreamMessageResponse : IStreamMessage
+    {
+        public StreamMessageResponse() { }
+
+        public StreamMessageResponse(List<StreamInfoLinks> links)
+        {
+            Links = links;
+        }
+
+        public StreamMessageResponse(Exception exception)
+        {
+            Success = exception;
+        }
+
+        public Exception? Success { get; set; }
+        public List<StreamInfoLinks> Links { get; set; } = [];
+    }
 }

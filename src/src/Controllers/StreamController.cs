@@ -51,5 +51,17 @@ namespace Metflix.Controllers
             return result.Info!;
         }
 
+        [HttpPost]
+        [Route("StreamLink")]
+        public async Task<List<StreamInfoLinks>> SendStreamLinks(Series data)
+        {
+            var result = await bridge.Ask<StreamMessageResponse>(new StreamMessageRequest(data));
+
+            if (result.Success != null)
+                throw new BadHttpRequestException(result.Success.Message);
+
+
+            return result.Links!;
+        }
     }
 }

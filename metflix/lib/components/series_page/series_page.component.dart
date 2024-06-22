@@ -14,7 +14,7 @@ class SeriesPageComponent extends ViewModelBuilder<SeriesPageModel> {
     return Center(
       child: Column(
         children: [
-          Text(viewModel.isBusy ? searchUrl: viewModel.info?.description ?? "Null"),
+          Text(viewModel.isBusy ? searchUrl: viewModel.links?.first.languageTitle ?? "Null"),
 
           OutlinedButton(
             onPressed: () => Navigator.of(context).pop(),

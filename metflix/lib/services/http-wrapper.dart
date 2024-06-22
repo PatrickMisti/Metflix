@@ -6,14 +6,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:metflix/model/popularity.dart';
 import 'package:http/http.dart' as http;
 import 'package:metflix/model/series_info.dart';
+import 'package:metflix/model/stream_links.dart';
+import 'package:metflix/util/helpers.dart';
 
 class HttpWrapper {
   final String baseUrl = 'localhost:5271';
   final String _popularity = 'api/stream/getpopularity';
   final String _series = 'api/stream/series';
+  final String _stream = 'api/stream/streamlink';
 
   Future<List<PopularitySeries>> getPopularity() async {
     try {
+      debugPrint("GET ${Uri.http(baseUrl, _popularity)}");
       var response = await http.get(Uri.http(baseUrl, _popularity));
       List list = jsonDecode(response.body);
       return list
@@ -27,8 +31,7 @@ class HttpWrapper {
 
   Future<SeriesInfo?> getSeriesFromUrl(String url) async {
     try {
-      debugPrint(jsonEncode(SeriesUrl(url)..toJson()));
-      debugPrint(Uri.http(baseUrl, _series).toString());
+      debugPrint("POST ${Uri.http(baseUrl, _series)}: ${jsonEncode(SeriesUrl(url)..toJson())}");
       var result = await http
           .post(Uri.http(baseUrl, _series),
               headers: <String, String>{'Content-Type': 'application/json'},
@@ -46,14 +49,25 @@ class HttpWrapper {
       return null;
     }
   }
-}
 
-class SeriesUrl {
-  final String url;
+  Future<List<StreamInfoLinks>?> getStreamLinksFromSeries(Series series) async {
+    try {
+      debugPrint("POST ${Uri.http(baseUrl, _stream)}: ${jsonEncode(series.toJson())}");
+      var result = await http
+          .post(Uri.http(baseUrl, _stream),
+          headers: <String, String>{'Content-Type': 'application/json'},
+          body: jsonEncode(series.toJson()))
+          .then((response) {
+        List element = jsonDecode(response.body);
+        return element.map((item) => StreamInfoLinks.fromJson(item as Map<String,dynamic>)).toList();
+      }).catchError((onError) {
+        debugPrint(onError);
+        return <StreamInfoLinks>[];
+      });
 
-  SeriesUrl(this.url);
-
-  Map<String, dynamic> toJson() {
-    return {"url": url};
+      return result;
+    } on Exception catch (_) {
+      return null;
+    }
   }
 }

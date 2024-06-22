@@ -41,4 +41,12 @@ class Series {
       url: json['url'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "season": season,
+      "episode": episode,
+      "url": url
+    };
+  }
 }

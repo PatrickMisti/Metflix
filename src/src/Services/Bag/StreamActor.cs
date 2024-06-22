@@ -50,6 +50,21 @@ namespace Metflix.Services.Bag
                     Sender.Tell(new SeriesInfoResponse(e));
                 }
             });
+
+            Receive<StreamMessageRequest>(m =>
+            {
+                try
+                {
+                    _logger.Debug("Get streams and language from series!");
+                    var i = _client.GetStreamAndLanguageFromSeriesAsync(m.Series).Result;
+                    Sender.Tell(new StreamMessageResponse(i.ToList()));
+                }
+                catch (Exception e)
+                {
+                    _logger.Error("Could not get Streamlink and language!", e);
+                    Sender.Tell(new StreamMessageResponse(e));
+                }
+            });
         }
 
 
