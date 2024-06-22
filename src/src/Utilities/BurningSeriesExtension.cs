@@ -79,10 +79,10 @@ namespace Metflix.Utilities
             var title = info.SelectSingleNode("//*[@class='series-title']/h1/span")?.InnerText;
             var des = info.SelectSingleNode("//*[@class='seri_des']")?.InnerText;
 
-            if (title.IsEmpty() || des.IsEmpty() || imageResult.IsEmpty())
+            if (title.IsEmpty() || des.IsEmpty())
                 throw new SeriesInfoNotFoundException("Could not find title/des/image from xml!");
 
-            return (title!, des!, imageResult!);
+            return (title!, des!, imageResult ?? "");
         }
 
         public static IEnumerable<string> SearchForAllSeason(this XmlNodeList element)

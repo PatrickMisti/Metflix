@@ -12,6 +12,16 @@ builder.Services.AddSwaggerGen();
 // creates instance of IPublicHashingService that can be accessed by ASP.NET
 builder.Services.AddSingleton<IActorBridge, HubService>();
 // starts the IHostedService, which creates the ActorSystem and actors
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(opt =>
+    {
+        opt
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 builder.Services.AddMemoryCache();
 builder.Services.AddHostedService(sp => (HubService)sp.GetRequiredService<IActorBridge>());
 
@@ -23,6 +33,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors();
 
 app.UseHttpsRedirection();
 

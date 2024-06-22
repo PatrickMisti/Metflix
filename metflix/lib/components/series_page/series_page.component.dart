@@ -1,6 +1,7 @@
-
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:metflix/components/series_page/series_page.model.dart';
+import 'package:metflix/services/http-wrapper.dart';
 import 'package:metflix/util/view-model-builder.dart';
 
 class SeriesPageComponent extends ViewModelBuilder<SeriesPageModel> {
@@ -13,7 +14,8 @@ class SeriesPageComponent extends ViewModelBuilder<SeriesPageModel> {
     return Center(
       child: Column(
         children: [
-          Text(searchUrl),
+          Text(viewModel.isBusy ? searchUrl: viewModel.info?.description ?? "Null"),
+
           OutlinedButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text("Back"),
@@ -25,6 +27,12 @@ class SeriesPageComponent extends ViewModelBuilder<SeriesPageModel> {
 
   @override
   SeriesPageModel viewModelBuilder(BuildContext context) {
-    return SeriesPageModel(context);
+    final getIt = GetIt.instance;
+    var http = getIt.get<HttpWrapper>();
+    return SeriesPageModel(
+      context,
+      http,
+      searchUrl: searchUrl,
+    );
   }
 }
