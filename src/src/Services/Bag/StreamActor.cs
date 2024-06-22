@@ -42,9 +42,7 @@ namespace Metflix.Services.Bag
                 {
                     _logger.Debug("Get series from url!");
                     var i = _client.GetDataFromSeriesAsync(m.Url).Result;
-                    _logger.Debug("Send data to rest point before");
                     Sender.Tell(new SeriesInfoResponse(i));
-                    _logger.Debug("Send data to rest point");
                 }
                 catch (Exception e)
                 {
