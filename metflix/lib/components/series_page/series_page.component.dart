@@ -9,17 +9,27 @@ class SeriesPageComponent extends ViewModelBuilder<SeriesPageModel> {
 
   const SeriesPageComponent({super.key, required this.searchUrl});
 
+  Widget getVideoPlayer(SeriesPageModel model) {
+    if (model.isBusy) return const Center(child: CircularProgressIndicator());
+
+
+    //return model.iframe;
+    return Text("data");
+  }
+
   @override
   Widget builder(BuildContext context, SeriesPageModel viewModel, _) {
     return Center(
       child: Column(
         children: [
-          Text(viewModel.isBusy ? searchUrl: viewModel.links?.first.languageTitle ?? "Null"),
-
+          Text(viewModel.isBusy
+              ? searchUrl
+              : viewModel.links?.first.languageTitle ?? "Null"),
+          getVideoPlayer(viewModel),
           OutlinedButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text("Back"),
-          )
+          ),
         ],
       ),
     );

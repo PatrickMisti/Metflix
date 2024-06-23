@@ -1,6 +1,8 @@
 ﻿using System.Collections.Immutable;
+using System.Security.Policy;
 using System.Xml;
 using Metflix.Models;
+using Metflix.Services.Exceptions;
 using Metflix.Utilities;
 using Serilog;
 using Serilog.Core;
@@ -115,6 +117,37 @@ namespace Metflix.HttpWrappers
             }
 
             return resultList.ToImmutableList();
+        }
+
+
+        public async Task<string> SearchLinkForVoeSiteAsync(string url)
+        {
+            var cuttingFrom = "prompt(\"Node\", \"";
+            var text = await GetAllTextAsync(url);
+
+            if (text == null) throw new StreamLinkNotFoundException("Voe stream could not found!");
+            int startIndexFrom = text.LastIndexOf(cuttingFrom, StringComparison.Ordinal) + cuttingFrom.Length;
+            string raw = text.Substring(startIndexFrom).Trim();
+
+            int endIndexOf = raw.IndexOf("\"", StringComparison.Ordinal);
+            string link = raw.Substring(0, endIndexOf);
+
+            _logger.Debug("the link is: " + link);
+            return link;
+        }
+
+        public async Task<string> SearchLinkForDoodStreamAsync(string url)
+        {
+            var result = await GetAllAsync(url);
+            var xml = Converts.ConvertHttpToXml(result);
+
+            if (xml == null) throw new StreamLinkNotFoundException("DoodStream link could not found!");
+
+            var video = xml.SelectSingleNode("//*[@id='video_player_html5_api']") as XmlElement;
+
+            var link = video?.GetAttribute("src");
+
+            return link;
         }
     }
 }

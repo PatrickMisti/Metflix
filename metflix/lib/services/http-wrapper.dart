@@ -14,6 +14,7 @@ class HttpWrapper {
   final String _popularity = 'api/stream/getpopularity';
   final String _series = 'api/stream/series';
   final String _stream = 'api/stream/streamlink';
+  final String _link = 'api/stream/link';
 
   Future<List<PopularitySeries>> getPopularity() async {
     try {
@@ -63,6 +64,30 @@ class HttpWrapper {
       }).catchError((onError) {
         debugPrint(onError);
         return <StreamInfoLinks>[];
+      });
+
+      return result;
+    } on Exception catch (_) {
+      return null;
+    }
+  }
+
+  Future<String?> getLinkForPlayer(ProviderUrl provider) async {
+    try {
+      //todo need provider to get correct data
+      //todo voe is m3u8 file
+      //todo doodlestream is normal video player
+      debugPrint("POST ${Uri.http(baseUrl, _link)}: ${jsonEncode(provider.toJson())}");
+      var result = await http
+          .post(Uri.http(baseUrl, _link),
+          headers: <String, String>{'Content-Type': 'application/json'},
+          body: jsonEncode(provider.toJson()))
+          .then((response) {
+        var element = response.body;
+        return element;
+      }).catchError((onError) {
+        debugPrint(onError);
+        return "";
       });
 
       return result;

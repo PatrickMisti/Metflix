@@ -1,5 +1,8 @@
-﻿using Akka.Actor;
+﻿using System.Net;
+using Akka.Actor;
+using Metflix.Controllers.helpers;
 using Metflix.HttpWrappers;
+using Metflix.Models;
 using Metflix.Services.Akka;
 using Metflix.Services.Message;
 using Metflix.Utilities;
@@ -65,9 +68,32 @@ namespace Metflix.Services.Bag
                     Sender.Tell(new StreamMessageResponse(e));
                 }
             });
+
+            Receive<StreamLinkMessageRequest>(m =>
+            {
+                try
+                {
+                    ProviderUrl provider = m.Provider;
+                    string result = string.Empty;
+                    _logger.Debug("Find master link from", provider.provider);
+
+                    result = provider.provider switch
+                    {
+                        SeriesProvider.Voe => _client.SearchLinkForVoeSiteAsync(provider.url).Result,
+                        SeriesProvider.Doodstream => _client.SearchLinkForDoodStreamAsync(provider.url).Result,
+                        SeriesProvider.Vidoza => throw new Exception(),
+                        SeriesProvider.Streamtape => throw new Exception()
+                    };
+ 
+                    Sender.Tell(new StreamLinkMessageResponse(result));
+                }
+                catch (Exception e)
+                {
+                    _logger.Error("Could find link for streaming!",e);
+                    Sender.Tell(new StreamLinkMessageResponse(e));
+                }
+            });
         }
-
-
 
         /*protected override void PreStart()
         {

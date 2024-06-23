@@ -24,17 +24,19 @@ namespace Metflix.Utilities
             if (rawLanguageBox == null || rawStreamLinks == null)
                 throw new XmlException("Could not extract stream links from xml!");
 
-            var rawLink = SearchForStreamLink(rawStreamLinks);
+            var rawLink = SearchForStreamLink(rawStreamLinks).ToList();
             return SearchForLang(rawLink, rawLanguageBox).ToImmutableList();
         }
 
-        private static IEnumerable<(int key, StreamLink)> SearchForStreamLink(XmlNodeList rawStreamLinks)
+        private static IList<(int key, StreamLink)> SearchForStreamLink(XmlNodeList rawStreamLinks)
         {
+            // yield return not working with IEnumerable
+            List<(int key, StreamLink)> list = [];
             foreach (XmlElement element in rawStreamLinks)
             {
-                var result = element.SelectSingleNode("//div/*[@class='watchEpisode']") as XmlElement;
+                var result = element.SelectSingleNode("div/a") as XmlElement;//  //div//*[@class='watchEpisode'] not work
                 var streamLink = result?.GetAttribute("href");
-                var provider = result?.SelectSingleNode("//h4")?.InnerText;
+                var provider = result?.SelectSingleNode("h4")?.InnerText; // //h4 not work
                 // data-lang-key is in the li tag
                 var langKeyRaw = element?.GetAttribute("data-lang-key");
                 bool isKey = int.TryParse(langKeyRaw, out var languageKey);
@@ -42,8 +44,10 @@ namespace Metflix.Utilities
                 if (streamLink.IsEmpty() || provider.IsEmpty() || !isKey)
                     throw new StreamLinkNotFoundException("Could not find a stream to watch!");
 
-                yield return (languageKey, new(streamLink, provider));
+                list.Add((languageKey, new (streamLink, provider)));
             }
+
+            return list;
         }
 
         private static bool IsEmpty(this string? data) => string.IsNullOrEmpty(data);

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using Metflix.Controllers.helpers;
 using Metflix.Models;
 
 namespace Metflix.Services.Message
@@ -70,4 +71,26 @@ namespace Metflix.Services.Message
         public Exception? Success { get; set; }
         public List<StreamInfoLinks> Links { get; set; } = [];
     }
+
+    public class StreamLinkMessageRequest(ProviderUrl provider) : IStreamMessage
+    {
+        public ProviderUrl Provider { get; set; } = provider;
+    }
+
+    public class StreamLinkMessageResponse : IStreamMessage
+    {
+        public StreamLinkMessageResponse(string url)
+        {
+            Url = url;
+        }
+
+        public StreamLinkMessageResponse(Exception e)
+        {
+            Success = e;
+        }
+        public string Url { get; set; }
+
+        public Exception? Success { get; set; }
+    }
+
 }

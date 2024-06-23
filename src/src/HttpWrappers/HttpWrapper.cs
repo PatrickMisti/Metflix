@@ -26,6 +26,14 @@ namespace Metflix.HttpWrappers
             return await response.Content.ReadAsStreamAsync();
         }
 
+        public async Task<string> GetAllTextAsync(string url)
+        {
+            HttpResponseMessage response = await Client.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsStringAsync();
+        }
+
         /// <summary>
         /// Search for list of series by form data call
         /// </summary>

@@ -63,5 +63,17 @@ namespace Metflix.Controllers
 
             return result.Links!;
         }
+
+        [HttpPost]
+        [Route("Link")]
+        public async Task<string> FindM3U8File(ProviderUrlDao data)
+        {
+            var result = await bridge.Ask<StreamLinkMessageResponse>(new StreamLinkMessageRequest(ProviderUrl.ToMap(data)));
+
+            if (result.Success != null)
+                throw new BadHttpRequestException(result.Success.Message);
+
+            return result.Url;
+        }
     }
 }
