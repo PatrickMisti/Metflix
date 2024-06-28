@@ -1,37 +1,40 @@
 ﻿using Akka.Actor;
-using Akka.Util.Internal;
 using Metflix.Services.Akka;
 using Metflix.Services.Bag;
 using Metflix.Services.Message;
 
-namespace Metflix.Services
+namespace Metflix.Services;
+
+public class Dispatcher: ReceiveActor, IReceiveActor
 {
-    public class Dispatcher: ReceiveActor, IReceiveActor
-    {
-        private IActorRef? _streamRef;
-        public Dispatcher()
-        { 
-            Activate();
+    private IActorRef? _streamRef;
+    public Dispatcher(IServiceProvider? provider)
+    { 
+        Activate(provider);
 
-            ReceiveAny(m =>
+        ReceiveAny(m =>
+        {
+            if (m is IStreamMessage)
             {
-                if (m is IStreamMessage)
-                {
-                    _streamRef.Forward(m);
-                }
-            });
-        }
-
-        public void Activate()
-        {
-            _streamRef = Context.ActorOf(StreamActor.Prop());
-        }
-
-        public static Props Prop()
-        {
-            return Props.Create(() => new Dispatcher());
-        }
-
-        public static string ActorName => nameof(Dispatcher);
+                _streamRef.Forward(m);
+            }
+        });
     }
+
+    public void Activate(IServiceProvider? provider)
+    {
+        _streamRef = Context.ActorOf(StreamActor.Prop(provider));
+    }
+
+    public static Props Prop()
+    {
+        return Props.Create(() => new Dispatcher(null));
+    }
+
+    public static Props Prop(IServiceProvider provider)
+    {
+        return Props.Create(() => new Dispatcher(provider));
+    }
+
+    public static string ActorName => nameof(Dispatcher);
 }

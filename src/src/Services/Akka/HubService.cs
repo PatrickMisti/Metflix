@@ -26,7 +26,7 @@ namespace Metflix.Services.Akka
 
             _actorSystem = ActorSystem.Create(HubName, actorSystemSetup);
 
-            _actorRef = _actorSystem.ActorOf(Dispatcher.Prop(), Dispatcher.ActorName);
+            _actorRef = _actorSystem.ActorOf(Dispatcher.Prop(_serviceProvider), Dispatcher.ActorName);
 
             // add a continuation task that will guarantee shutdown of application if ActorSystem terminates
             //await _actorSystem.WhenTerminated.ContinueWith(tr => {

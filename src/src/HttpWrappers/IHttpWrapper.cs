@@ -2,6 +2,6 @@
 
 public interface IHttpWrapper
 {
-    Task<Stream> GetAllAsync(string uri);
+    Task<Stream> GetAllStreamAsync(string uri);
     Task<IList<T>> SearchWithFormDataAsync<T>(string path, string key, string search);
 }

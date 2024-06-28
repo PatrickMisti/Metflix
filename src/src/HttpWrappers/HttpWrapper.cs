@@ -9,7 +9,7 @@ namespace Metflix.HttpWrappers
         protected readonly HttpClient Client = new()
         {
             BaseAddress = new Uri(url),
-            Timeout = TimeSpan.FromSeconds(5) // not sure if too much
+            Timeout = TimeSpan.FromSeconds(5), // not sure if too much
         };
         
 
@@ -18,7 +18,7 @@ namespace Metflix.HttpWrappers
         /// </summary>
         /// <param name="uri"></param>
         /// <returns>Stream</returns>
-        public async Task<Stream> GetAllAsync(string uri)
+        public async Task<Stream> GetAllStreamAsync(string uri)
         {
             HttpResponseMessage response = await Client.GetAsync(uri);
             response.EnsureSuccessStatusCode();
