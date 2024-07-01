@@ -58,7 +58,7 @@ public static class BurningSeriesExtension
         {
             // get title and lang key from xml
             string langKeyRaw = element?.GetAttribute("data-lang-key") ?? "Nan";
-            if (int.TryParse(langKeyRaw, out var i)) throw new SeriesInfoNotFoundException("Language key not found!");
+            if (!int.TryParse(langKeyRaw, out var i)) throw new SeriesInfoNotFoundException("Language key not found!");
             var key = int.Parse(langKeyRaw);
 
             yield return new(

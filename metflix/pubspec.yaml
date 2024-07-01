@@ -41,6 +41,10 @@ dependencies:
   rxdart: ^0.28.0
   http: ^1.2.1
   get_it: ^7.7.0
+  chewie: ^1.8.1
+  video_player: ^2.9.0
+  video_player_win: ^2.3.8
+  better_player: ^0.0.84
 
 dev_dependencies:
   flutter_test:

@@ -14,6 +14,8 @@ public class AniHttpClient(string basicUrl) : HttpWrapper(basicUrl)
     private readonly string _searchPath = "/ajax/search";
     private readonly string _popularityPath = "/beliebte-animes";
 
+    private int _retryCount = 0;
+
     private readonly Logger _logger = new LoggerConfiguration()
         .WriteTo.Console()
         .MinimumLevel.Debug()
@@ -124,16 +126,40 @@ public class AniHttpClient(string basicUrl) : HttpWrapper(basicUrl)
         var cuttingFrom = "prompt(\"Node\", \"";
         var text = await GetAllTextAsync(url);
 
+        return await TrimVoeSiteForPlayerUrl(text);
+    }
+
+    private async Task<string> TrimVoeSiteForPlayerUrl(string text)
+    {
+        var cuttingFrom = "prompt(\"Node\", \"";
         if (text == null) throw new StreamLinkNotFoundException("Voe stream could not found!");
         int startIndexFrom = text.LastIndexOf(cuttingFrom, StringComparison.Ordinal) + cuttingFrom.Length;
         string raw = text.Substring(startIndexFrom).Trim();
 
         int endIndexOf = raw.IndexOf("\"", StringComparison.Ordinal);
-        string link = raw.Substring(0, endIndexOf);
+        if (endIndexOf == -1) return await RedirectionForVoe(text);
+        string link = raw?.Substring(0, endIndexOf);
 
         _logger.Debug("the link is: " + link);
         return link;
     }
+
+    private async Task<string> RedirectionForVoe(string text)
+    {
+        if (_retryCount > 0) return String.Empty;
+        _retryCount++;
+        var href = "window.location.href = '";
+        var textRaw = text.Substring(text.IndexOf(href)+ href.Length);
+        var redirection = textRaw.Substring(0, textRaw.IndexOf("'"));
+
+        var client = new HttpClient();
+        HttpResponseMessage response = await client.GetAsync(redirection);
+        response.EnsureSuccessStatusCode();
+        client.Dispose();
+        return await TrimVoeSiteForPlayerUrl(await response.Content.ReadAsStringAsync());
+    }
+
+    public void ResetRetry() => _retryCount = 0;
 
     public async Task<string?> SearchLinkForDoodStreamAsync(string url)
     {

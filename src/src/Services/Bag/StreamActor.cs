@@ -43,9 +43,9 @@ public class StreamActor : ReceiveActor, IReceiveActor
             {
                 _logger.Debug("Catch all Popularity Series!");
                 if (memory.TryGetValue(_popularityKey, out IImmutableList<PopularitySeries>? result)) Sender.Tell(new PopularityMessageResponse(result!));
-                var i = await _client.GetPopularityTitle();
-                memory.Set(_popularityKey, i, cacheOptions);
-                Sender.Tell(new PopularityMessageResponse(i));
+                result = await _client.GetPopularityTitle();
+                memory.Set(_popularityKey, result, cacheOptions);
+                Sender.Tell(new PopularityMessageResponse(result));
             }
             catch (Exception e)
             {
@@ -59,8 +59,12 @@ public class StreamActor : ReceiveActor, IReceiveActor
             try
             {
                 _logger.Debug("Get series from url!");
-                var i = await _client.GetDataFromSeriesAsync(m.Url);
-                Sender.Tell(new SeriesInfoResponse(i));
+                if (memory.TryGetValue<SeriesInfo>(m.Url, out var result)) Sender.Tell(new SeriesInfoResponse(result!));
+
+                result = await _client.GetDataFromSeriesAsync(m.Url);
+
+                memory.Set(m.Url, result, cacheOptions);
+                Sender.Tell(new SeriesInfoResponse(result));
             }
             catch (Exception e)
             {
@@ -88,17 +92,17 @@ public class StreamActor : ReceiveActor, IReceiveActor
         {
             try
             {
-                ProviderUrl provider = m.Provider;
-                string result = string.Empty;
-                _logger.Debug("Find master link from", provider.provider);
+                ProviderUrl link = m.Provider;
+                _client.ResetRetry();
+                _logger.Debug("Find master link from", link.provider);
 
-                result = provider.provider switch
+                var result = link.provider switch
                 {
-                    SeriesProvider.Voe => await _client.SearchLinkForVoeSiteAsync(provider.url),
+                    SeriesProvider.Voe => await _client.SearchLinkForVoeSiteAsync(link.url),
                     SeriesProvider.Doodstream => throw new Exception("DoodStream not implemented"),
                     SeriesProvider.Vidoza => throw new Exception("Vidoza not implemented"),
                     SeriesProvider.Streamtape => throw new Exception("StreamTape not implemented"),
-                    _ => throw new ArgumentOutOfRangeException()
+                    _ => string.Empty
                 };
  
                 Sender.Tell(new StreamLinkMessageResponse(result));
@@ -110,12 +114,6 @@ public class StreamActor : ReceiveActor, IReceiveActor
             }
         });
     }
-
-    /*protected override void PreStart()
-    {
-        _client = new AniHttpClient(Config.HostLink.AniWorld);
-        base.PreStart();
-    }*/
 
     public static Props Prop()
     {

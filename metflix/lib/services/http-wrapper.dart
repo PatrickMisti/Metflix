@@ -10,7 +10,8 @@ import 'package:metflix/model/stream_links.dart';
 import 'package:metflix/util/helpers.dart';
 
 class HttpWrapper {
-  final String baseUrl = 'localhost:5271';
+  final String baseUrl  = "192.168.1.15:5271";
+  final String androidEmulatorUrl = 'localhost:5271';
   final String _popularity = 'api/stream/getpopularity';
   final String _series = 'api/stream/series';
   final String _stream = 'api/stream/streamlink';
