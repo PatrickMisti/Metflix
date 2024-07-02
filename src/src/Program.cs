@@ -9,9 +9,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// creates instance of IPublicHashingService that can be accessed by ASP.NET
-builder.Services.AddSingleton<IActorBridge, HubService>();
-// starts the IHostedService, which creates the ActorSystem and actors
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(opt =>
@@ -23,6 +21,10 @@ builder.Services.AddCors(options =>
     });
 });
 builder.Services.AddMemoryCache();
+
+// creates instance of IPublicHashingService that can be accessed by ASP.NET
+builder.Services.AddSingleton<IActorBridge, HubService>();
+// starts the IHostedService, which creates the ActorSystem and actors  
 builder.Services.AddHostedService(sp => (HubService)sp.GetRequiredService<IActorBridge>());
 
 var app = builder.Build();

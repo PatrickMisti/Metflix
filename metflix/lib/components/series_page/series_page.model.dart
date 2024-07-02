@@ -47,15 +47,17 @@ class SeriesPageModel extends BaseModel {
   }
 
   String url ="";
-  setUpPlayerController() async {
-    url = "https://delivery-node-bfpibfrrprmpeojr.voe-network.net/engine/hls2-c/01/11112/munelcc6cdw1_,n,l,.urlset/master.m3u8?t=yvRjsiUgzBxH0OFZcP1sUXDpSuZ2iGxHX6OdURd2Wug&s=1719658191&e=14400&f=55815614&node=delivery-node-o92n1eqci9twxhqi.voe-network.net&i=190.2&sp=2500&asn=49981";
-    debugPrint("setup");
-
+  setUpPlayerController() {
+    /* url = "https://delivery-node-x0i0mnamsg4z43ee.voe-network.net/engine/hls2-c/01/11112/munelcc6cdw1_,n,l,.urlset/master.m3u8?t=r0c1bWHf7hql4po5YAWwOJR_sKnp4mrr2tOoryR8jPc&s=1719935920&e=14400&f=55815614&node=delivery-node-uc5khvddsowstrhc.voe-network.net&i=81.10&sp=2500&asn=12605";
+    */debugPrint("setup");
+    if (controller != null) {
+      controller?.dispose();
+    }
     controller = BetterPlayerController(
-      BetterPlayerConfiguration(
-
+      const BetterPlayerConfiguration(
+        autoPlay: true,
       ),
-      betterPlayerDataSource: BetterPlayerDataSource.network(url),
+      betterPlayerDataSource: BetterPlayerDataSource.network(_currentStream!),
     );
     /*controller = VideoPlayerController.networkUrl(Uri.parse(url));
     await controller?.initialize();
@@ -72,6 +74,7 @@ class SeriesPageModel extends BaseModel {
 
   Future<void> loadStreamFromPlayer() async {
     _currentStream = await _httpWrapper.getLinkForPlayer(ProviderUrl(url: _currentStreamLink!.frameLink, provider: _currentStreamLink!.linkType));
+    setUpPlayerController();
   }
 
   Image get getSeriesImage => series?.image != null ? Image.memory(series!.image) : Image.asset(defaultImage);
@@ -131,8 +134,8 @@ class SeriesPageModel extends BaseModel {
 
   onEpisodeChangedUpdateLinks() async {
     await loadLinksFromEpisode();
+    await onStreamLinkChosen();
     isEpisodeLoading = false;
-    notifyListeners();
   }
 
   onStreamLinkChosen() async {

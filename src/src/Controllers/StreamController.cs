@@ -3,19 +3,26 @@ using Metflix.Models;
 using Metflix.Services.Akka;
 using Metflix.Services.Message;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
+using Serilog.Core;
 
 namespace Metflix.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class StreamController(ILogger<StreamController> logger, IActorBridge bridge) : ControllerBase
+public class StreamController(IActorBridge bridge) : ControllerBase
 {
-        
+    private readonly Logger _logger = new LoggerConfiguration()
+        .WriteTo.Console()
+        .MinimumLevel.Debug()
+        .CreateLogger();
+
 
     [HttpGet]
     [Route("GetPopularity")]
     public async Task<List<PopularitySeries>> GetPopularity()
     {
+        _logger.Debug("Call GetPopularity!");
         var result = await bridge.Ask<PopularityMessageResponse>(PopularityMessageRequest.Instance);
 
         if (result.Success != null)

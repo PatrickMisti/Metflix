@@ -31,8 +31,8 @@ public class AniHttpClient(string basicUrl) : HttpWrapper(basicUrl)
     /// <returns>SeasonMeta</returns>
     public async Task<SeriesInfo> GetDataFromSeriesAsync(string uri)
     {
-        var stream = await GetAllStreamAsync(uri);
-        var xml = Converts.ConvertHttpToXml(stream);
+        var response = await GetAllStreamAsync(uri);
+        var xml = response.ConvertHttpToXml();
 
         var info = xml.SelectNodes("//*[@id='series']")?.Item(0);
         if (info == null) throw new XmlException("Could not find selected xml!");
@@ -55,7 +55,7 @@ public class AniHttpClient(string basicUrl) : HttpWrapper(basicUrl)
         foreach (var element in seasons)
         {
             var response = await GetAllStreamAsync(element);
-            var rawSubXml = Converts.ConvertHttpToXml(response);
+            var rawSubXml = response.ConvertHttpToXml();
             var allSeries = rawSubXml.PrepareFilterForSearch(false).SearchEpisodes();
             list.AddRange(allSeries.ToList());
         }
@@ -68,15 +68,14 @@ public class AniHttpClient(string basicUrl) : HttpWrapper(basicUrl)
     /// </summary>
     /// <param name="series">Series</param>
     /// <returns>SeriesInfo</returns>
-    public async Task<IList<StreamInfoLinks>> GetStreamAndLanguageFromSeriesAsync(Series series)
-    {
-        return await GetStreamAndLanguageFromUrlAsync(series.Url);
-    }
+    public Task<IList<StreamInfoLinks>> GetStreamAndLanguageFromSeriesAsync(Series series)
+        => GetStreamAndLanguageFromUrlAsync(series.Url);
+    
 
     public async Task<IList<StreamInfoLinks>> GetStreamAndLanguageFromUrlAsync(string url)
     {
         var response = await GetAllStreamAsync(url);
-        var xml = Converts.ConvertHttpToXml(response);
+        var xml = response.ConvertHttpToXml();
 
         if (xml == null) throw new Exception();
 
@@ -94,13 +93,13 @@ public class AniHttpClient(string basicUrl) : HttpWrapper(basicUrl)
     /// </summary>
     /// <param name="search">string</param>
     /// <returns>List of SearchEntry</returns>
-    public async Task<IList<SearchEntry>> SearchForSeriesAsync(string search)
-        => await SearchWithFormDataAsync<SearchEntry>(_searchPath, "keyword", search);
+    public Task<IList<SearchEntry>> SearchForSeriesAsync(string search)
+        => SearchWithFormDataAsync<SearchEntry>(_searchPath, "keyword", search);
 
     public async Task<IImmutableList<PopularitySeries>> GetPopularityTitle()
     {
         var response = await GetAllStreamAsync(_popularityPath);
-        var xml = Converts.ConvertHttpToXml(response);
+        var xml = response.ConvertHttpToXml();
 
         if (xml == null) throw new XmlException("Could not found popularity page!");
 
@@ -122,12 +121,9 @@ public class AniHttpClient(string basicUrl) : HttpWrapper(basicUrl)
 
 
     public async Task<string> SearchLinkForVoeSiteAsync(string url)
-    {
-        var cuttingFrom = "prompt(\"Node\", \"";
-        var text = await GetAllTextAsync(url);
-
-        return await TrimVoeSiteForPlayerUrl(text);
-    }
+        => await TrimVoeSiteForPlayerUrl(
+            await GetAllTextAsync(url));
+    
 
     private async Task<string> TrimVoeSiteForPlayerUrl(string text)
     {

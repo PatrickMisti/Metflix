@@ -51,21 +51,11 @@ namespace Metflix.Utilities
         /// <param name="byteStream"></param>
         /// <returns></returns>
         /// <exception cref="XmlException"></exception>
-        public static XmlDocument ConvertHttpToXml(Stream byteStream)
+        public static XmlDocument ConvertHttpToXml(this Stream byteStream)
         {
             try
             {
-                SgmlReader sgml = new()
-                {
-                    DocType = "HTML",
-                    WhitespaceHandling = WhitespaceHandling.All,
-                    CaseFolding = CaseFolding.ToLower,
-                    InputStream = new StreamReader(byteStream)
-                };
-
-                XmlDocument doc = new();
-                doc.Load(sgml);
-                return doc;
+                return new HtmlReader(new StreamReader(byteStream)).ToXmlDocument();
             }
             catch (Exception e)
             {

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Akka.Actor;
+using Akka.DependencyInjection;
 using Metflix.Controllers.helpers;
 using Metflix.HttpWrappers;
 using Metflix.Models;

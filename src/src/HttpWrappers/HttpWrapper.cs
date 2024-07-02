@@ -26,9 +26,9 @@ namespace Metflix.HttpWrappers
             return await response.Content.ReadAsStreamAsync();
         }
 
-        public async Task<string> GetAllTextAsync(string url)
+        public async Task<string> GetAllTextAsync(string uri)
         {
-            HttpResponseMessage response = await Client.GetAsync(url);
+            HttpResponseMessage response = await Client.GetAsync(uri);
             response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadAsStringAsync();

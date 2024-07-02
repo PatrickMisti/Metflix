@@ -1,6 +1,25 @@
 @src_HostAddress = http://localhost:5271
 
-GET {{src_HostAddress}}/weatherforecast/
+GET {{src_HostAddress}}/api/stream/GetPopularity
 Accept: application/json
 
 ###
+
+POST {{src_HostAddress}}/api/stream/series
+Content-Type: application/json
+Accept: application/json
+{"url":"/anime/stream/kaiju-no-8"}
+
+###
+
+POST {{src_HostAddress}}/api/stream/streamlink 
+Content-Type: application/json
+Accept: application/json
+{"season":"1","episode":"1","url":"/anime/stream/kaiju-no-8/staffel-1/episode-1"}
+
+###
+
+POST {{src_HostAddress}}/api/stream/link
+Content-Type: application/json
+Accept: application/json
+{"url":"/redirect/2507750","provider":"VOE"}
